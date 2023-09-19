@@ -1,8 +1,8 @@
-FROM python:alpine
+FROM python:latest
 
 # # Install dependencies
 # ADD resolv.conf /etc/resolv.conf
-RUN apk update
+RUN sudo apt-get update && sudo apt-get upgrade
 
 # ENV DJANGO_SUPERUSER_PASSWORD=#####
 
