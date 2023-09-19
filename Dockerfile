@@ -3,12 +3,8 @@ FROM python:latest
 # # Install dependencies
 # ADD resolv.conf /etc/resolv.conf
 RUN apt-get update \
-    && apt-get upgrade \
-    && apt-get install postgresql-client -y
+    && apt-get upgrade
 
-
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
 # ENV DJANGO_SUPERUSER_PASSWORD=#####
 
 
