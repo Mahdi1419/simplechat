@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Chat Rooms</title>
+    <!-- Include Bootstrap CSS (Bootstrap 5.x.x) -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="row d-flex justify-content-center mt-5"><h2 class="text-center">Topics</h2></div>
+    <div class="container mt-5">
+      {% if topics|length > 0 %}
+      <table class="table table-hover table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Title</th>
+            <th scope="col">Members</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for topic in topics %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{topic.title}}</td>
+            <td>
+                {% for user in topic.users.all %}
+                    {{user.username}}
+                    {% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td><a class="btn btn-primary" role="button" aria-disabled="true" onclick="enter('{{topic.uuid.hex}}')" id="room-name-submit" >Enter</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <h1>There is not any topic for you!</h1>
+      {% endif %}
+    </div>
+
+    <script>
+      let enter = (name) => {
+        window.location.pathname = "/chat/" + name + "/";
+      }
+    </script>
+
+    <!-- Include Bootstrap JS (Bootstrap 5.x.x) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

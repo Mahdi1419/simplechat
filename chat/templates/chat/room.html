@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Chat Room</title>
+    <!-- Include Bootstrap CSS (Bootstrap 5.x.x) -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"
+      integrity="sha512-B4skI5FiLurS86aioJx9VfozI1wjqrn6aTdJH+YQUmCZum/ZibPBTX55k5d9XM6EsKePDInkLVrN7vPmJxc1qA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <style>
+      .chat-screen {
+        min-height: 75vh;
+        max-height: 75vh;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-md-12">
+          <h2 class="text-center">Chat Room</h2>
+          <div class="card chat-screen">
+            <div class="card-body"></div>
+          </div>
+        </div>
+      </div>
+      <div class="input-group my-3">
+        <input
+          id="chat-message-input"
+          type="text"
+          class="form-control"
+          placeholder="Enter your message"
+        />
+        <div style="position: relative; cursor: pointer;user-select: none !important;">
+            <span onclick="openemoji()" class="d-flex align-items-center justify-content-center" style="width: 3em;height: auto;font-size: 24px;">🙂</span>
+          <div
+          class="emoji-box"
+            style="
+              position: absolute;
+              right: 0;
+              border-radius: 1em;
+              box-sizing: border-box;
+              overflow: hidden;
+              display: none;
+            "
+          >
+            <emoji-picker></emoji-picker>
+          </div>
+        </div>
+        <div class="input-group-append">
+          <button
+            id="chat-message-submit"
+            class="btn btn-primary"
+            type="button"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+    {{ room_name|json_script:"room-name" }}
+    <script>
+      const roomName = JSON.parse(
+        document.getElementById("room-name").textContent
+      );
+
+      const chatSocket = new ReconnectingWebSocket(
+        "ws://" + window.location.host + "/ws/chat/" + roomName + "/"
+      );
+
+      chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+
+        if (data.command && data.command == "load_data") {
+          data.message.map((data) =>
+            create_chat_message(
+              data.username,
+              data.text,
+              "{{user.username}}" == data.username
+            )
+          );
+        } else {
+          messagedata = data.message;
+          console.log(messagedata);
+          create_chat_message(
+            messagedata.username,
+            messagedata.text,
+            "{{user.username}}" == messagedata.username
+          );
+        }
+      };
+
+      chatSocket.onopen = function (e) {
+        chatSocket.send(
+          JSON.stringify({
+            command: "load_data",
+            message: "",
+          })
+        );
+      };
+
+      chatSocket.onclose = function (e) {
+        console.error("Chat socket closed unexpectedly");
+      };
+
+      document.querySelector("#chat-message-input").focus();
+      document.querySelector("#chat-message-input").onkeyup = function (e) {
+        if (e.key === "Enter") {
+          // enter, return
+          document.querySelector("#chat-message-submit").click();
+        }
+      };
+
+      document.querySelector("#chat-message-submit").onclick = function (e) {
+        const messageInputDom = document.querySelector("#chat-message-input");
+        const message = messageInputDom.value;
+        chatSocket.send(
+          JSON.stringify({
+            command: "new_message",
+            message: message,
+          })
+        );
+        messageInputDom.value = "";
+      };
+
+      function create_chat_message(username, message, my) {
+        let classess = my
+          ? "bg-primary mx-3 mt-1 mb-3 px-3 py-2 rounded-2 text-white w-auto"
+          : "bg-success m-3 px-3 py-2 rounded-2 text-white w-auto";
+        let align = my ? "justify-content-end" : "justify-content-start";
+        let el = `
+        <div class='row d-flex ${align}'>
+            <div class='${classess}'>
+                ${username}: ${message}
+            </div>
+        </div>
+        `;
+        let box = document.querySelector(".chat-screen .card-body");
+
+        box.innerHTML += el;
+        scroll_to_down();
+      }
+
+      function scroll_to_down() {
+        let box = document.querySelector(".chat-screen");
+        box.scrollTop = box.scrollHeight;
+      }
+
+      window.onload = () => {
+        scroll_to_down();
+        document
+          .querySelector("emoji-picker")
+          .addEventListener("emoji-click", (event) => {
+            const messageInputDom = document.querySelector("#chat-message-input");
+            messageInputDom.value += event.detail.unicode
+          }
+          );
+      };
+
+      function openemoji() {
+        const messageInputDom = document.querySelector("#chat-message-input");
+        let box = document.querySelector('.emoji-box')
+        if (box.style.display === "none") {
+            box.style.display = "block";
+        } else {
+            messageInputDom.focus()
+            box.style.display = "none";
+        }
+
+      }
+
+    </script>
+    <!-- Include Bootstrap JS (Bootstrap 5.x.x) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
