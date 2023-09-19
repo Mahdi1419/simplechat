@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:alpine
 
 # # Install dependencies
 # ADD resolv.conf /etc/resolv.conf
