@@ -18,8 +18,8 @@ RUN pip install --upgrade pip
 # copy requirements.txt to work directory (/app/requirements.txt)
 ADD ./requirements.txt .
 
+COPY . .
+
 # install packages
 RUN pip install -r requirements.txt
-
-CMD [ "python manage.py runserver 0.0.0.0:8000" ]
 
