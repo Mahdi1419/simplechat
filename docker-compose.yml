@@ -1,0 +1,18 @@
+version: '3.8'
+
+
+services:
+  app:
+    build: ./
+    container_name: chatapp
+    restart: always
+    ports:
+      - 8000:8000
+
+    entrypoint: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+
+  redis:
+    image: redis:alpine
+    container_name: chatredis
+    restart: always
