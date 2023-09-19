@@ -2,7 +2,7 @@ FROM python:latest
 
 # # Install dependencies
 # ADD resolv.conf /etc/resolv.conf
-RUN apt-get update && apt-get upgrade
+RUN apt-get update -y && apt-get upgrade -y
 
 # ENV DJANGO_SUPERUSER_PASSWORD=#####
 
